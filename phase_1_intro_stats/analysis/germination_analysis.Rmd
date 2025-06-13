@@ -1,0 +1,62 @@
+
+---
+title: "Germination Analysis under Salinity Stress"
+author: "Isaac Koomson"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+```
+
+## 📥 Load Dataset
+
+```{r}
+data <- read_csv("datasets/seed_germination_stress.csv")
+head(data)
+```
+
+## 📊 Calculate Germination Percentage
+
+```{r}
+data <- data %>%
+  mutate(Germination_Percent = (Germinated_Seeds / Total_Seeds) * 100)
+```
+
+## 📈 Summary Statistics per Treatment
+
+```{r}
+summary_stats <- data %>%
+  group_by(Treatment) %>%
+  summarise(
+    Mean = mean(Germination_Percent),
+    SD = sd(Germination_Percent),
+    SE = SD / sqrt(n()),
+    CV = (SD / Mean) * 100
+  )
+summary_stats
+```
+
+## 📦 Boxplot: Germination Percentage by Salinity Treatment
+
+```{r}
+ggplot(data, aes(x = Treatment, y = Germination_Percent, fill = Treatment)) +
+  geom_boxplot() +
+  labs(title = "Effect of Salinity on Germination", y = "Germination (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## 🧠 Biological Interpretation
+
+The plot and statistics show that increasing salinity levels reduce germination percentages. At 2.0 dS/m, germination drops below 40%, indicating strong salinity stress. Control treatments maintain nearly 100% germination.
+
+---
+
+## 🧪 Next Steps (Phase 1.2)
+
+- Perform ANOVA to compare treatments
+- Run Tukey HSD test
+- Visualize group differences with letters

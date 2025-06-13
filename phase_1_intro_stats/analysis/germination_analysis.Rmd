@@ -1,0 +1,56 @@
+---
+title: "germination_analysis"
+author: "Isaac Appiah-Asare Koomson"
+date: "2025-06-13"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggplot2)
+```
+
+## Load Dataset
+
+```{r}
+data <- read_csv(file.choose())
+```
+
+## Calculate Germination Percentage
+
+```{r}
+data <-data %>% 
+  mutate(Germination_Percentage = (Germinated_Seeds / Total_Seeds) * 100)
+```
+
+## View New Table
+
+```{r}
+print(data)
+```
+
+## Summary Statistics per Treatment
+
+```{r}
+summary_stats <- data %>%
+  group_by(Treatment) %>%
+  summarise(
+    Mean = mean(Germination_Percentage),
+    SD = sd(Germination_Percentage),
+    SE = SD / sqrt(n()),
+    CV = (SD / Mean) * 100
+  )
+summary_stats
+```
+
+
+## Boxplot: Germination Percentage by Salinity Treatment
+
+```{r eval = TRUE, echo = TRUE}
+ggplot(data, aes(x = Treatment, y = Germination_Percentage, fill = Treatment)) +
+  geom_boxplot() +
+  labs(title = "Effect of Salinity on Germination", y = "Germination (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```

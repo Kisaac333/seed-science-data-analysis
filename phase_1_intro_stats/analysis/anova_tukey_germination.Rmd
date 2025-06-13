@@ -1,0 +1,96 @@
+
+---
+title: "Phase 1.2: Statistical Analysis – ANOVA & Tukey HSD"
+author: "Isaac Appiah-Asare Koomson"
+date: "2025-06-13"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+library(tidyverse)
+library(ggplot2)
+library(multcompView)
+```
+
+## Load Dataset
+
+```{r}
+# Load data
+data <- read_csv("D:/myR/seedscience/data/seed_germination_stress.csv")
+head(data)
+```
+
+## Calculate Germination Percentage
+
+```{r}
+data <- data %>% 
+  mutate(Germination_Percentage = (Germinated_Seeds / Total_Seeds) * 100)
+```
+
+## Summary Statistics per Treatment
+
+```{r}
+summary_stats <- data %>%
+  group_by(Treatment) %>%
+  summarise(
+    Mean = mean(Germination_Percentage),
+    SD = sd(Germination_Percentage),
+    SE = SD / sqrt(n()),
+    CV = (SD / Mean) * 100
+  )
+summary_stats
+```
+
+## Boxplot: Germination Percentage by Salinity Treatment
+
+```{r}
+ggplot(data, aes(x = Treatment, y = Germination_Percentage, fill = Treatment)) +
+  geom_boxplot() +
+  labs(title = "Effect of Salinity on Germination", y = "Germination (%)") +
+  theme_minimal() +
+  theme(legend.position = "none")
+```
+
+## Treat Treatment as Factor
+
+```{r}
+data$Treatment <- as.factor(data$Treatment)
+```
+
+## Run ANOVA
+
+```{r}
+anova_model <- aov(Germination_Percentage ~ Treatment, data = data)
+summary(anova_model)
+```
+
+## Tukey HSD Test
+
+```{r}
+tukey_result <- TukeyHSD(anova_model)
+tukey_result
+```
+
+## Extract Tukey Group Letters
+
+```{r}
+tukey_letters <- multcompLetters4(anova_model, tukey_result)
+
+# Create data frame of group letters
+group_letters <- as.data.frame.list(tukey_letters$Treatment) %>%
+  rownames_to_column("Treatment") %>%
+  rename(group = Letters)
+
+# Merge with summary stats
+summary_stats <- merge(summary_stats, group_letters, by = "Treatment")
+summary_stats
+```
+
+## Final Clean Table
+
+```{r}
+summary_stats <- summary_stats %>%
+  select(Treatment, Mean, SD, SE, CV, group)
+summary_stats
+```

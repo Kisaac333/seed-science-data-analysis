@@ -47,7 +47,7 @@ summary_stats
 
 ## Boxplot: Germination Percentage by Salinity Treatment
 
-```{r eval = TRUE, echo = TRUE}
+```{r}
 ggplot(data, aes(x = Treatment, y = Germination_Percentage, fill = Treatment)) +
   geom_boxplot() +
   labs(title = "Effect of Salinity on Germination", y = "Germination (%)") +
